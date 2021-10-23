@@ -26,6 +26,11 @@ jobs:
         with:
           python-version: '3.9'
 
+      - name: Install npm dependencies
+        run: |
+          npm install --global yarn
+          yarn install
+
       - name: Check for new releases and create a PR if needed
         shell: bash
         env:
