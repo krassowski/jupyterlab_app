@@ -10,7 +10,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  prepare_release:
+  check_lab_version:
     runs-on: ubuntu-latest
 
     steps:
@@ -50,6 +50,7 @@ jobs:
             git commit . -m "Update to JupyterLab v${LATEST}"
             
             git push --set-upstream origin "${BRANCH_NAME}"            
-            hub pull-request -m "New JupyterLab release v{LATEST} is available."
+            hub pull-request -m "Update to JupyterLab v${LATEST}" \
+                -m "New JupyterLab release [v${LATEST}](https://github.com/jupyterlab/jupyterlab/releases/tag/v{$LATEST}) is available".
           fi
 
