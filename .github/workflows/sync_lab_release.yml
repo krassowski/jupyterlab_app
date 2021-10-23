@@ -1,0 +1,57 @@
+name: Check for new JupyterLab releases
+
+on:
+  schedule:
+    - cron: 42 2 * * *
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check_for_lab_updates:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.9'
+
+      - name: Install npm dependencies
+        run: |
+          npm install --global yarn
+          yarn install
+
+      - name: Check for new releases and create a PR if needed
+        shell: bash
+        env:
+          GITHUB_USER: ${{ secrets.GITHUB_USER }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -eux
+          export LATEST=$(python scripts/get_latest_lab_version.py)
+          yarn set_jupyterlab_version ${LATEST}
+          # if resulted in any change:
+          if [[ ! -z "$(git status --porcelain package.json)" ]]; then
+            export BRANCH_NAME=update-to-v${LATEST}
+            # this will fail if the branch already exists which means we won't have duplicate PRs
+            git checkout -b "${BRANCH_NAME}"
+            git config user.name "JupyterLab Desktop Bot"
+            git config user.email 'jupyterlab-bot@users.noreply.github.com'
+            
+            git commit . -m "Update to JupyterLab v${LATEST}"
+            
+            git push --set-upstream origin "${BRANCH_NAME}"            
+            hub pull-request -m "Update to JupyterLab v${LATEST}" \
+                -m "New JupyterLab release [v${LATEST}](https://github.com/jupyterlab/jupyterlab/releases/tag/v${LATEST}) is available".
+          fi
+
