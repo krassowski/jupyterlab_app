@@ -43,6 +43,7 @@ jobs:
           # if resulted in any change:
           if [[ ! -z "$(git status --porcelain package.json)" ]]; then
             export BRANCH_NAME=update-to-v${LATEST}
+            # this will fail if the branch already exists which means we won't have duplicate PRs
             git checkout -b "${BRANCH_NAME}"
             git config user.name "JupyterLab Desktop Bot"
             git config user.email 'jupyterlab-bot@users.noreply.github.com'
