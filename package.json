@@ -85,7 +85,8 @@
           "from": "dist-resources/win/jlab.cmd",
           "to": "jlab.cmd"
         }
-      ]
+      ],
+      "compression": "maximum"
     },
     "rpm": {
       "depends": [
